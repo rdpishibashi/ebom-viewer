@@ -35,9 +35,8 @@ st.markdown("""
 
     /* ヘッダースタイル */
     .structure-header {
-        background-color: #e9ecef;
+        background-color: #f0f2f5;
         padding: 0.5rem;
-        border-radius: 4px;
         text-align: center;
         font-weight: bold;
         margin-bottom: 0.5rem;
@@ -47,16 +46,6 @@ st.markdown("""
     .scrollable-columns {
         overflow-x: auto;
         white-space: nowrap;
-    }
-
-    /* 縦スクロール可能なコンテナ */
-    .scrollable-container {
-        max-height: 400px;
-        overflow-y: auto;
-        padding: 0.5rem;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        background-color: #ffffff;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -182,11 +171,7 @@ if structure_df is not None and parts_list_df is not None and parts_df is not No
             if next_level_items and len(cols) <= len(st.session_state.selected_path):
                 st.info("→ 横スクロールで次のレベルを表示")
 
-    st.divider()
-
     # Attribute ウィンドウ
-    st.markdown('<div class="structure-header">Attribute</div>', unsafe_allow_html=True)
-
     if len(st.session_state.selected_path) > 0:
         last_selected = st.session_state.selected_path[-1]
 
@@ -209,20 +194,16 @@ if structure_df is not None and parts_list_df is not None and parts_df is not No
             non_empty_attrs = {k: v for k, v in attr_display.items() if v != '' and pd.notna(v)}
 
             if non_empty_attrs:
-                # 属性を縦に表示（スクロール可能）
-                with st.container():
-                    st.markdown('<div class="scrollable-container">', unsafe_allow_html=True)
+                # 属性を展開表示
+                with st.expander("Attribute"):
                     for key, value in non_empty_attrs.items():
                         st.write(f"**{key}:** {value}")
-                    st.markdown('</div>', unsafe_allow_html=True)
             else:
                 st.info("表示する属性がありません")
         else:
             st.info("属性データが見つかりません")
     else:
         st.info("Structure でアイテムを選択してください")
-
-    st.divider()
 
     # Parts List と Part Specs ウィンドウ
     # Structure の選択が終わった時点（次のレベルがない）で表示
@@ -282,10 +263,8 @@ if structure_df is not None and parts_list_df is not None and parts_df is not No
                     st.info("該当する Parts List がありません")
                     st.session_state.selected_part_number = None
 
-            # Part Specs ウィンドウ
+            # Part Specification ウィンドウ
             with parts_cols[1]:
-                st.markdown('<div class="structure-header">Part Specs</div>', unsafe_allow_html=True)
-
                 if st.session_state.selected_part_number:
                     # Parts シートから該当する部品番号の情報を取得
                     part_specs = parts_df[parts_df['部品番号'] == st.session_state.selected_part_number]
@@ -293,27 +272,8 @@ if structure_df is not None and parts_list_df is not None and parts_df is not No
                     if not part_specs.empty:
                         spec = part_specs.iloc[0]
 
-                        # 要求された4つのフィールドを表示（スクロール可能）
-                        with st.container():
-                            st.markdown('<div class="scrollable-container">', unsafe_allow_html=True)
-                            st.write(f"**品目名称:**")
-                            st.write(f"{spec.get('品目名称', '')}")
-                            st.divider()
-
-                            st.write(f"**メーカ名:**")
-                            st.write(f"{spec.get('メーカ名', '')}")
-                            st.divider()
-
-                            st.write(f"**メーカ型式:**")
-                            st.write(f"{spec.get('メーカ型式', '')}")
-                            st.divider()
-
-                            st.write(f"**統一名称:**")
-                            st.write(f"{spec.get('統一名称', '')}")
-                            st.markdown('</div>', unsafe_allow_html=True)
-
-                        # その他の情報を展開表示
-                        with st.expander("📋 詳細情報を表示"):
+                        # 全てのフィールドを展開表示
+                        with st.expander("Part Specification"):
                             for col in part_specs.columns:
                                 value = spec.get(col, '')
                                 if value != '' and pd.notna(value):
